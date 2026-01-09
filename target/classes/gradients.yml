@@ -1,0 +1,30 @@
+## GRADIENT SETTINGS
+## Each gradient must have a unique integer ID
+gradients:
+  1: # must be an integer and unique to this gradient.
+    name: "AbleGamers Name Colour" # name of the gradient displayed within GUI (limited to ~27 characters due to item name length limitations).
+    startColour: "#F2709C" # starting colour of this gradient.
+    endColour: "#FFB454" # ending colour of this gradient.
+    alternatePermission: "yourserver.ablegamers" # an optional alternative permission node giving a player access to this gradient.
+    overridePermission: "yourserver.ablegamers.override" # an optional permission node which will force this gradient to be applied.
+    overrideWeight: 1 # if a player has multiple override permissions, the gradient with the highest weight will be applied.
+  2:
+    name: "Beyond Blue $25 Name Colour"
+    startColour: "#59EAA4"
+    endColour: "#089CCC"
+  3:
+    name: "Beyond Blue $300 Name Colour"
+    startColour: "#59EAA4"
+    endColour: "#CD03FF"
+  4:
+    name: "Make-A-Wish Colour"
+    startColour: "#f74fdb"
+    endColour: "#940ee2"
+  5:
+    name: "SpecialEffect Name Colour"
+    startColour: "#ffd728"
+    endColour: "#ff7328"
+  6:
+    name: "Water.org Name Colour"
+    startColour: "#33E7FF"
+    endColour: "#0368FF"

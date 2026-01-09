@@ -1,0 +1,47 @@
+name: NameGradient
+version: ${project.version}
+main: com.gradientcolor.namegradient.NameGradient
+api-version: 1.20
+description: A plugin for applying gradient colors to player names
+authors: [GradientColor]
+softdepend:
+  - PlaceholderAPI
+  - Essentials
+  - CMI
+
+commands:
+  gradient:
+    description: Opens the gradient selection menu
+    usage: /<command>
+    permission: namegradient.use
+  namegradient:
+    description: Main plugin command
+    usage: /<command> [reload|clear|change]
+    aliases: [ng]
+
+permissions:
+  namegradient.use:
+    description: Permission to open the gradient selector menu
+    default: true
+  namegradient.reload:
+    description: Permission to reload the configuration
+    default: op
+  namegradient.others.clear:
+    description: Permission to clear another player's gradient
+    default: op
+  namegradient.others.change:
+    description: Permission to change another player's gradient
+    default: op
+  namegradient.override.exempt:
+    description: Permission to bypass override gradient restrictions when managing others
+    default: op
+  namegradient.gradient.*:
+    description: Permission to use all gradients
+    default: op
+    children:
+      namegradient.gradient.1: true
+      namegradient.gradient.2: true
+      namegradient.gradient.3: true
+      namegradient.gradient.4: true
+      namegradient.gradient.5: true
+      namegradient.gradient.6: true

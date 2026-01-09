@@ -1,0 +1,14 @@
+/home/sayan/IdeaProjects/GradiantColor/src/main/java/com/gradientcolor/namegradient/config/ConfigManager.java
+/home/sayan/IdeaProjects/GradiantColor/src/main/java/com/gradientcolor/namegradient/util/GradientHelper.java
+/home/sayan/IdeaProjects/GradiantColor/src/main/java/com/gradientcolor/namegradient/placeholders/NameGradientExpansion.java
+/home/sayan/IdeaProjects/GradiantColor/src/main/java/com/gradientcolor/namegradient/listeners/MenuListener.java
+/home/sayan/IdeaProjects/GradiantColor/src/main/java/com/gradientcolor/namegradient/config/MessageManager.java
+/home/sayan/IdeaProjects/GradiantColor/src/main/java/com/gradientcolor/namegradient/data/PlayerDataManager.java
+/home/sayan/IdeaProjects/GradiantColor/src/main/java/com/gradientcolor/namegradient/gui/GradientMenu.java
+/home/sayan/IdeaProjects/GradiantColor/src/main/java/com/gradientcolor/namegradient/commands/NameGradientCommand.java
+/home/sayan/IdeaProjects/GradiantColor/src/main/java/com/gradientcolor/namegradient/config/GradientManager.java
+/home/sayan/IdeaProjects/GradiantColor/src/main/java/com/gradientcolor/namegradient/listeners/PlayerListener.java
+/home/sayan/IdeaProjects/GradiantColor/src/main/java/com/gradientcolor/namegradient/NameGradient.java
+/home/sayan/IdeaProjects/GradiantColor/src/main/java/com/gradientcolor/namegradient/commands/GradientCommand.java
+/home/sayan/IdeaProjects/GradiantColor/src/main/java/com/gradientcolor/namegradient/util/ColorUtil.java
+/home/sayan/IdeaProjects/GradiantColor/src/main/java/com/gradientcolor/namegradient/model/Gradient.java

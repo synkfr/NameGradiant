@@ -1,0 +1,35 @@
+## NAME SETTINGS
+## Altering these settings will likely require a server restart due to the varying dependency checks within different modes.
+name:
+  mode: "PLAYERNAME" # available modes: "PLAYERNAME", "DISPLAYNAME", "ESSENTIALS", "CMI", AND "PLACEHOLDER".
+  colour-dependent: false # if true, NameGradient will not apply a gradient if the name to be replaced already has colours present.
+  placeholder-source: "%player_name%" # the PlaceholderAPI placeholder to use if mode is set to "PLACEHOLDER".
+  override-displayname: true # must be false when using the "DISPLAYNAME" or "ESSENTIALS" modes.
+
+## GUI/MENU SETTINGS
+menu:
+  title: "&8Gradients"
+  size: 45 # must be a multiple of 9
+  per_page: 21 # amount of gradients shown per page
+  panes:
+    slots: [0,1,2,3,4,5,6,7,8,9,17,18,26,27,35,36,37,38,42,43,44]
+    name: "&7"
+    material: BLACK_STAINED_GLASS_PANE
+  gradient_item:
+    material: NAME_TAG
+    lore_permission:
+      - "&7♦ &eClick to apply this gradient."
+    lore_no_permission:
+      - "&7♦ &cYou don't have sufficient permission."
+  page_back_item:
+    slot: 39
+    material: ARROW
+    name: "&7Page Back"
+  page_forward_item:
+    slot: 41
+    material: ARROW
+    name: "&7Page Forward"
+  clear_gradient_item:
+    slot: 40
+    material: BARRIER
+    name: "&cClear current gradient"
