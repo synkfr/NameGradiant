@@ -25,7 +25,7 @@ public class GradientCommand implements CommandExecutor {
         Player player = (Player) sender;
 
         if (!player.hasPermission("namegradient.use")) {
-            player.sendMessage(plugin.getMessageManager().getMessage("no_permission"));
+            player.sendMessage(plugin.getMessagesConfig().getMessage("no_permission"));
             return true;
         }
 

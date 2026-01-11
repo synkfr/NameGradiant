@@ -1,6 +1,7 @@
 package com.gradientcolor.namegradient.util;
 
 import com.gradientcolor.namegradient.NameGradient;
+import com.gradientcolor.namegradient.config.okaeri.PluginConfig;
 import com.gradientcolor.namegradient.model.Gradient;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
@@ -12,16 +13,17 @@ public class GradientHelper {
      * Get the source name for a player based on the configured mode
      */
     public static String getSourceName(NameGradient plugin, Player player) {
-        String mode = plugin.getConfigManager().getNameMode().toUpperCase();
-        
+        PluginConfig config = plugin.getPluginConfig();
+        String mode = config.getNameMode().toUpperCase();
+
         switch (mode) {
             case "DISPLAYNAME":
                 return ColorUtil.stripColors(player.getDisplayName());
             case "ESSENTIALS":
                 if (Bukkit.getPluginManager().getPlugin("Essentials") != null) {
                     try {
-                        com.earth2me.essentials.Essentials ess = 
-                            (com.earth2me.essentials.Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+                        com.earth2me.essentials.Essentials ess = (com.earth2me.essentials.Essentials) Bukkit
+                                .getPluginManager().getPlugin("Essentials");
                         if (ess != null) {
                             return ColorUtil.stripColors(ess.getUser(player).getNickname());
                         }
@@ -35,7 +37,7 @@ public class GradientHelper {
                 return player.getName();
             case "PLACEHOLDER":
                 if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-                    String placeholder = plugin.getConfigManager().getPlaceholderSource();
+                    String placeholder = config.getPlaceholderSource();
                     String result = PlaceholderAPI.setPlaceholders(player, placeholder);
                     return ColorUtil.stripColors(result);
                 }
@@ -50,16 +52,17 @@ public class GradientHelper {
      * Check if the source name has color codes (for colour-dependent mode)
      */
     public static boolean hasColouredSource(NameGradient plugin, Player player) {
-        String mode = plugin.getConfigManager().getNameMode().toUpperCase();
-        
+        PluginConfig config = plugin.getPluginConfig();
+        String mode = config.getNameMode().toUpperCase();
+
         switch (mode) {
             case "DISPLAYNAME":
                 return ColorUtil.hasColorCodes(player.getDisplayName());
             case "ESSENTIALS":
                 if (Bukkit.getPluginManager().getPlugin("Essentials") != null) {
                     try {
-                        com.earth2me.essentials.Essentials ess = 
-                            (com.earth2me.essentials.Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+                        com.earth2me.essentials.Essentials ess = (com.earth2me.essentials.Essentials) Bukkit
+                                .getPluginManager().getPlugin("Essentials");
                         if (ess != null) {
                             String nick = ess.getUser(player).getNickname();
                             return nick != null && ColorUtil.hasColorCodes(nick);
@@ -71,7 +74,7 @@ public class GradientHelper {
                 return false;
             case "PLACEHOLDER":
                 if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-                    String placeholder = plugin.getConfigManager().getPlaceholderSource();
+                    String placeholder = config.getPlaceholderSource();
                     String result = PlaceholderAPI.setPlaceholders(player, placeholder);
                     return ColorUtil.hasColorCodes(result);
                 }
@@ -88,7 +91,7 @@ public class GradientHelper {
         // Get the player's selected gradient
         Integer gradientId = plugin.getPlayerDataManager().getPlayerGradient(player.getUniqueId());
         if (gradientId != null) {
-            return plugin.getGradientManager().getGradient(gradientId);
+            return plugin.getGradientsConfig().getGradient(gradientId);
         }
         return null;
     }
@@ -98,13 +101,13 @@ public class GradientHelper {
      */
     public static String applyGradientToName(NameGradient plugin, Player player) {
         Gradient gradient = getActiveGradient(plugin, player);
-        
+
         if (gradient == null) {
             return getSourceName(plugin, player);
         }
 
         // Check colour-dependent mode
-        if (plugin.getConfigManager().isColourDependent() && hasColouredSource(plugin, player)) {
+        if (plugin.getPluginConfig().isColourDependent() && hasColouredSource(plugin, player)) {
             return getSourceName(plugin, player);
         }
 
@@ -116,7 +119,7 @@ public class GradientHelper {
      * Update a player's display name with their gradient
      */
     public static void updatePlayerName(NameGradient plugin, Player player) {
-        if (!plugin.getConfigManager().isOverrideDisplayname()) {
+        if (!plugin.getPluginConfig().isOverrideDisplayname()) {
             return;
         }
 

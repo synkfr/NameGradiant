@@ -8,6 +8,7 @@ softdepend:
   - PlaceholderAPI
   - Essentials
   - CMI
+  - LuckPerms
 
 commands:
   gradient:

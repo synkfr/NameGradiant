@@ -24,25 +24,30 @@ public class MenuListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) return;
-        
+        if (!(event.getWhoClicked() instanceof Player))
+            return;
+
         // Check if the inventory holder is our menu
-        if (event.getInventory().getHolder() == null) return;
-        if (!(event.getInventory().getHolder() instanceof GradientMenu)) return;
+        if (event.getInventory().getHolder() == null)
+            return;
+        if (!(event.getInventory().getHolder() instanceof GradientMenu))
+            return;
 
         event.setCancelled(true);
 
         Player player = (Player) event.getWhoClicked();
         GradientMenu menu = (GradientMenu) event.getInventory().getHolder();
-        
+
         // Make sure click is in the top inventory (our menu), not player inventory
-        if (event.getClickedInventory() == null || !event.getClickedInventory().equals(event.getView().getTopInventory())) {
+        if (event.getClickedInventory() == null
+                || !event.getClickedInventory().equals(event.getView().getTopInventory())) {
             return;
         }
-        
+
         ItemStack clickedItem = event.getCurrentItem();
 
-        if (clickedItem == null || clickedItem.getType().isAir()) return;
+        if (clickedItem == null || clickedItem.getType().isAir())
+            return;
 
         // Extract action from PDC (for navigation and clear buttons)
         String action = GradientMenu.extractAction(plugin, clickedItem);
@@ -81,21 +86,21 @@ public class MenuListener implements Listener {
         // Clear the gradient - always allow
         plugin.getPlayerDataManager().clearPlayerGradient(player.getUniqueId());
         GradientHelper.updatePlayerName(plugin, player);
-        player.sendMessage(plugin.getMessageManager().getMessage("clear"));
+        player.sendMessage(plugin.getMessagesConfig().getMessage("clear"));
         player.closeInventory();
     }
 
     private void handleGradientSelection(Player player, int gradientId) {
-        Gradient gradient = plugin.getGradientManager().getGradient(gradientId);
-        
+        Gradient gradient = plugin.getGradientsConfig().getGradient(gradientId);
+
         if (gradient == null) {
-            player.sendMessage(plugin.getMessageManager().getMessage("gradient_nonexistent"));
+            player.sendMessage(plugin.getMessagesConfig().getMessage("gradient_nonexistent"));
             return;
         }
 
         // Check if player has permission to use this gradient
         if (!gradient.hasPermission(player)) {
-            player.sendMessage(plugin.getMessageManager().getMessage("no_permission_gradient"));
+            player.sendMessage(plugin.getMessagesConfig().getMessage("no_permission_gradient"));
             return;
         }
 
@@ -107,8 +112,8 @@ public class MenuListener implements Listener {
         String gradientName = GradientHelper.getGradientPreview(gradient, player.getName());
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("{GRADIENT}", gradientName);
-        player.sendMessage(plugin.getMessageManager().getMessage("apply", placeholders));
-        
+        player.sendMessage(plugin.getMessagesConfig().getMessage("apply", placeholders));
+
         player.closeInventory();
     }
 }

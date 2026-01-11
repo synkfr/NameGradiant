@@ -1,6 +1,7 @@
 package com.gradientcolor.namegradient.commands;
 
 import com.gradientcolor.namegradient.NameGradient;
+import com.gradientcolor.namegradient.config.okaeri.MessagesConfig;
 import com.gradientcolor.namegradient.model.Gradient;
 import com.gradientcolor.namegradient.util.GradientHelper;
 import org.bukkit.Bukkit;
@@ -11,7 +12,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,8 +51,12 @@ public class NameGradientCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private MessagesConfig messages() {
+        return plugin.getMessagesConfig();
+    }
+
     private void sendUsage(CommandSender sender) {
-        sender.sendMessage(plugin.getMessageManager().getMessage("args_incorrect"));
+        sender.sendMessage(messages().getMessage("args_incorrect"));
         sender.sendMessage("§7Usage:");
         sender.sendMessage("§7/namegradient reload §8- §fReload configuration");
         sender.sendMessage("§7/namegradient clear <player> §8- §fClear a player's gradient");
@@ -60,27 +65,27 @@ public class NameGradientCommand implements CommandExecutor, TabCompleter {
 
     private void handleReload(CommandSender sender) {
         if (!sender.hasPermission("namegradient.reload")) {
-            sender.sendMessage(plugin.getMessageManager().getMessage("no_permission"));
+            sender.sendMessage(messages().getMessage("no_permission"));
             return;
         }
 
         try {
             plugin.reload();
-            sender.sendMessage(plugin.getMessageManager().getMessage("config_reload_success"));
+            sender.sendMessage(messages().getMessage("config_reload_success"));
         } catch (Exception e) {
-            sender.sendMessage(plugin.getMessageManager().getMessage("config_reload_error"));
+            sender.sendMessage(messages().getMessage("config_reload_error"));
             e.printStackTrace();
         }
     }
 
     private void handleClear(CommandSender sender, String[] args) {
         if (!sender.hasPermission("namegradient.others.clear")) {
-            sender.sendMessage(plugin.getMessageManager().getMessage("no_permission"));
+            sender.sendMessage(messages().getMessage("no_permission"));
             return;
         }
 
         if (args.length < 2) {
-            sender.sendMessage(plugin.getMessageManager().getMessage("args_incorrect"));
+            sender.sendMessage(messages().getMessage("args_incorrect"));
             return;
         }
 
@@ -88,13 +93,13 @@ public class NameGradientCommand implements CommandExecutor, TabCompleter {
         Player target = Bukkit.getPlayer(targetName);
 
         if (target == null) {
-            sender.sendMessage(plugin.getMessageManager().getMessage("target_offline"));
+            sender.sendMessage(messages().getMessage("target_offline"));
             return;
         }
 
         // Check if sender is trying to clear their own gradient
         if (sender instanceof Player && ((Player) sender).getUniqueId().equals(target.getUniqueId())) {
-            sender.sendMessage(plugin.getMessageManager().getMessage("attempt_clear_own"));
+            sender.sendMessage(messages().getMessage("attempt_clear_own"));
             return;
         }
 
@@ -102,18 +107,18 @@ public class NameGradientCommand implements CommandExecutor, TabCompleter {
         plugin.getPlayerDataManager().clearPlayerGradient(target.getUniqueId());
         GradientHelper.updatePlayerName(plugin, target);
 
-        sender.sendMessage(plugin.getMessageManager().getMessage("clear_success"));
-        target.sendMessage(plugin.getMessageManager().getMessage("clear_target_success"));
+        sender.sendMessage(messages().getMessage("clear_success"));
+        target.sendMessage(messages().getMessage("clear_target_success"));
     }
 
     private void handleChange(CommandSender sender, String[] args) {
         if (!sender.hasPermission("namegradient.others.change")) {
-            sender.sendMessage(plugin.getMessageManager().getMessage("no_permission"));
+            sender.sendMessage(messages().getMessage("no_permission"));
             return;
         }
 
         if (args.length < 3) {
-            sender.sendMessage(plugin.getMessageManager().getMessage("args_incorrect"));
+            sender.sendMessage(messages().getMessage("args_incorrect"));
             return;
         }
 
@@ -121,13 +126,13 @@ public class NameGradientCommand implements CommandExecutor, TabCompleter {
         Player target = Bukkit.getPlayer(targetName);
 
         if (target == null) {
-            sender.sendMessage(plugin.getMessageManager().getMessage("target_offline"));
+            sender.sendMessage(messages().getMessage("target_offline"));
             return;
         }
 
         // Check if sender is trying to change their own gradient
         if (sender instanceof Player && ((Player) sender).getUniqueId().equals(target.getUniqueId())) {
-            sender.sendMessage(plugin.getMessageManager().getMessage("attempt_change_own"));
+            sender.sendMessage(messages().getMessage("attempt_change_own"));
             return;
         }
 
@@ -135,19 +140,19 @@ public class NameGradientCommand implements CommandExecutor, TabCompleter {
         try {
             gradientId = Integer.parseInt(args[2]);
         } catch (NumberFormatException e) {
-            sender.sendMessage(plugin.getMessageManager().getMessage("args_incorrect"));
+            sender.sendMessage(messages().getMessage("args_incorrect"));
             return;
         }
 
-        Gradient gradient = plugin.getGradientManager().getGradient(gradientId);
+        Gradient gradient = plugin.getGradientsConfig().getGradient(gradientId);
         if (gradient == null) {
-            sender.sendMessage(plugin.getMessageManager().getMessage("gradient_nonexistent"));
+            sender.sendMessage(messages().getMessage("gradient_nonexistent"));
             return;
         }
 
         // Check if target has permission to use this gradient
         if (!gradient.hasPermission(target)) {
-            sender.sendMessage(plugin.getMessageManager().getMessage("target_permission_error"));
+            sender.sendMessage(messages().getMessage("target_permission_error"));
             return;
         }
 
@@ -155,8 +160,8 @@ public class NameGradientCommand implements CommandExecutor, TabCompleter {
         plugin.getPlayerDataManager().setPlayerGradient(target.getUniqueId(), gradientId);
         GradientHelper.updatePlayerName(plugin, target);
 
-        sender.sendMessage(plugin.getMessageManager().getMessage("change_success"));
-        target.sendMessage(plugin.getMessageManager().getMessage("change_target_success"));
+        sender.sendMessage(messages().getMessage("change_success"));
+        target.sendMessage(messages().getMessage("change_target_success"));
     }
 
     @Override
@@ -189,7 +194,8 @@ public class NameGradientCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 3 && args[0].equalsIgnoreCase("change")) {
-            return plugin.getGradientManager().getAllGradients().keySet().stream()
+            Collection<Integer> gradientIds = plugin.getGradientsConfig().getGradientIds();
+            return gradientIds.stream()
                     .map(String::valueOf)
                     .filter(id -> id.startsWith(args[2]))
                     .collect(Collectors.toList());
