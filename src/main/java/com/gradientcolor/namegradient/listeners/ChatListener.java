@@ -5,6 +5,8 @@ import com.gradientcolor.namegradient.config.okaeri.ChatFormatConfig;
 import com.gradientcolor.namegradient.hooks.LuckPermsHook;
 import com.gradientcolor.namegradient.util.ColorUtil;
 import com.gradientcolor.namegradient.util.GradientHelper;
+import me.clip.placeholderapi.PlaceholderAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,13 +17,16 @@ import java.util.Map;
 
 /**
  * Listener for chat events - handles LuckPerms group-based formatting
+ * Supports PlaceholderAPI placeholders in chat formats
  */
 public class ChatListener implements Listener {
 
     private final NameGradient plugin;
+    private final boolean placeholderApiEnabled;
 
     public ChatListener(NameGradient plugin) {
         this.plugin = plugin;
+        this.placeholderApiEnabled = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -36,8 +41,13 @@ public class ChatListener implements Listener {
         Player player = event.getPlayer();
         String format = getFormatForPlayer(player, chatConfig);
 
-        // Apply placeholders
+        // Apply internal placeholders first
         format = applyPlaceholders(format, player, event.getMessage());
+
+        // Apply PlaceholderAPI placeholders (if available)
+        if (placeholderApiEnabled) {
+            format = PlaceholderAPI.setPlaceholders(player, format);
+        }
 
         // Apply colors (including &#RRGGBB support)
         format = ColorUtil.colorize(format);
@@ -80,13 +90,13 @@ public class ChatListener implements Listener {
     }
 
     /**
-     * Apply placeholders to the format string
+     * Apply internal placeholders to the format string
      */
     private String applyPlaceholders(String format, Player player, String message) {
         // Get player name with gradient applied
         String gradientName = GradientHelper.applyGradientToName(plugin, player);
 
-        // Apply all placeholders
+        // Apply all internal placeholders
         format = format.replace("{player}", player.getName());
         format = format.replace("{displayname}", gradientName);
         format = format.replace("{message}", message);
