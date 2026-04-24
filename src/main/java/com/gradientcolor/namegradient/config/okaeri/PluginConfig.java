@@ -60,6 +60,28 @@ public class PluginConfig extends OkaeriConfig {
     private Material clearGradientMaterial = Material.BARRIER;
     private String clearGradientName = "§cClear current gradient";
 
+    // Storage settings
+    @Comment("")
+    @Comment("## STORAGE SETTINGS")
+    @Comment("Available types: YAML, MYSQL")
+    private String storageType = "YAML";
+
+    private String mysqlHost = "localhost";
+    private int mysqlPort = 3306;
+    private String mysqlDatabase = "minecraft";
+    private String mysqlUsername = "root";
+    private String mysqlPassword = "password";
+    private boolean mysqlSsl = false;
+
+    // Redis settings
+    @Comment("")
+    @Comment("## CROSS-SERVER (REDIS) SETTINGS")
+    private boolean redisEnable = false;
+    private String redisHost = "localhost";
+    private int redisPort = 6379;
+    private String redisPassword = "";
+    private String redisChannel = "namegradient_updates";
+
     // Getters
     public String getNameMode() {
         return nameMode;
@@ -147,5 +169,53 @@ public class PluginConfig extends OkaeriConfig {
 
     public String getClearGradientName() {
         return clearGradientName;
+    }
+
+    public String getStorageType() {
+        return storageType;
+    }
+
+    public String getMysqlHost() {
+        return mysqlHost;
+    }
+
+    public int getMysqlPort() {
+        return mysqlPort;
+    }
+
+    public String getMysqlDatabase() {
+        return mysqlDatabase;
+    }
+
+    public String getMysqlUsername() {
+        return mysqlUsername;
+    }
+
+    public String getMysqlPassword() {
+        return mysqlPassword;
+    }
+
+    public boolean isMysqlSsl() {
+        return mysqlSsl;
+    }
+
+    public boolean isRedisEnable() {
+        return redisEnable;
+    }
+
+    public String getRedisHost() {
+        return redisHost;
+    }
+
+    public int getRedisPort() {
+        return redisPort;
+    }
+
+    public String getRedisPassword() {
+        return redisPassword;
+    }
+
+    public String getRedisChannel() {
+        return redisChannel;
     }
 }

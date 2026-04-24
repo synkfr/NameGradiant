@@ -33,3 +33,23 @@ menu:
     slot: 40
     material: BARRIER
     name: "&cClear current gradient"
+
+## STORAGE SETTINGS
+## Available types: YAML, MYSQL
+storage:
+  type: "YAML"
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "minecraft"
+    username: "root"
+    password: "password"
+    ssl: false
+
+## CROSS-SERVER (REDIS) SETTINGS
+redis:
+  enable: false
+  host: "localhost"
+  port: 6379
+  password: ""
+  channel: "namegradient_updates"
