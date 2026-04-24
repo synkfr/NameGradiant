@@ -76,6 +76,7 @@ public class NameGradient extends JavaPlugin {
     public void onDisable() {
         if (playerDataManager != null) {
             playerDataManager.savePlayerData();
+            playerDataManager.shutdown();
         }
         getLogger().info("NameGradient has been disabled!");
     }

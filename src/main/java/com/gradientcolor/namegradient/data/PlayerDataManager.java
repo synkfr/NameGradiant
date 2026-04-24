@@ -1,11 +1,11 @@
 package com.gradientcolor.namegradient.data;
 
 import com.gradientcolor.namegradient.NameGradient;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
+import com.gradientcolor.namegradient.data.storage.MySQLStorage;
+import com.gradientcolor.namegradient.data.storage.Storage;
+import com.gradientcolor.namegradient.data.storage.YamlStorage;
+import com.gradientcolor.namegradient.sync.RedisManager;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -13,8 +13,8 @@ import java.util.UUID;
 public class PlayerDataManager {
 
     private final NameGradient plugin;
-    private FileConfiguration dataConfig;
-    private File dataFile;
+    private Storage storage;
+    private RedisManager redisManager;
     private final Map<UUID, Integer> playerGradients = new HashMap<>();
 
     public PlayerDataManager(NameGradient plugin) {
@@ -22,57 +22,62 @@ public class PlayerDataManager {
     }
 
     public void loadPlayerData() {
-        dataFile = new File(plugin.getDataFolder(), "playerdata.yml");
-        if (!dataFile.exists()) {
-            try {
-                dataFile.createNewFile();
-            } catch (IOException e) {
-                plugin.getLogger().severe("Could not create playerdata.yml!");
-                e.printStackTrace();
-            }
+        String type = plugin.getPluginConfig().getStorageType();
+        if (type.equalsIgnoreCase("MYSQL")) {
+            storage = new MySQLStorage(plugin);
+        } else {
+            storage = new YamlStorage(plugin);
         }
-        dataConfig = YamlConfiguration.loadConfiguration(dataFile);
+        
+        storage.init();
+        
+        // Initialize Redis if enabled
+        if (plugin.getPluginConfig().isRedisEnable()) {
+            redisManager = new RedisManager(plugin);
+            redisManager.init();
+        }
 
         playerGradients.clear();
+        playerGradients.putAll(storage.loadAllPlayerData());
 
-        if (dataConfig.getConfigurationSection("players") != null) {
-            for (String uuidString : dataConfig.getConfigurationSection("players").getKeys(false)) {
-                try {
-                    UUID uuid = UUID.fromString(uuidString);
-                    int gradientId = dataConfig.getInt("players." + uuidString);
-                    playerGradients.put(uuid, gradientId);
-                } catch (IllegalArgumentException e) {
-                    plugin.getLogger().warning("Invalid UUID in playerdata.yml: " + uuidString);
-                }
-            }
-        }
-
-        plugin.getLogger().info("Loaded " + playerGradients.size() + " player gradients.");
+        plugin.getLogger().info("Loaded " + playerGradients.size() + " player gradients using " + type + " storage.");
     }
 
     public void savePlayerData() {
-        dataConfig.set("players", null);
-        
-        for (Map.Entry<UUID, Integer> entry : playerGradients.entrySet()) {
-            dataConfig.set("players." + entry.getKey().toString(), entry.getValue());
+        // With database storage, we save immediately on change.
+        // This method is mainly for YAML or bulk saving if needed.
+        if (storage instanceof YamlStorage) {
+            for (Map.Entry<UUID, Integer> entry : playerGradients.entrySet()) {
+                storage.savePlayerData(entry.getKey(), entry.getValue());
+            }
         }
+    }
 
-        try {
-            dataConfig.save(dataFile);
-        } catch (IOException e) {
-            plugin.getLogger().severe("Could not save playerdata.yml!");
-            e.printStackTrace();
+    public void shutdown() {
+        if (storage != null) {
+            storage.shutdown();
+        }
+        if (redisManager != null) {
+            redisManager.shutdown();
         }
     }
 
     public void setPlayerGradient(UUID uuid, int gradientId) {
         playerGradients.put(uuid, gradientId);
-        savePlayerData();
+        storage.savePlayerData(uuid, gradientId);
+        
+        if (redisManager != null) {
+            redisManager.publishUpdate(uuid, gradientId);
+        }
     }
 
     public void clearPlayerGradient(UUID uuid) {
         playerGradients.remove(uuid);
-        savePlayerData();
+        storage.clearPlayerData(uuid);
+        
+        if (redisManager != null) {
+            redisManager.publishUpdate(uuid, null);
+        }
     }
 
     public Integer getPlayerGradient(UUID uuid) {
@@ -81,5 +86,17 @@ public class PlayerDataManager {
 
     public boolean hasGradient(UUID uuid) {
         return playerGradients.containsKey(uuid);
+    }
+
+    /**
+     * Handle update from another server via Redis
+     */
+    public void handleRemoteUpdate(UUID uuid, Integer gradientId) {
+        if (gradientId == null) {
+            playerGradients.remove(uuid);
+        } else {
+            playerGradients.put(uuid, gradientId);
+        }
+        // No need to save to storage as the origin server already did that.
     }
 }
