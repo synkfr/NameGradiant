@@ -23,18 +23,37 @@ public class PlayerDataManager {
 
     public void loadPlayerData() {
         String type = plugin.getPluginConfig().getStorageType();
+        boolean mysqlFailed = false;
+
         if (type.equalsIgnoreCase("MYSQL")) {
-            storage = new MySQLStorage(plugin);
-        } else {
-            storage = new YamlStorage(plugin);
+            try {
+                storage = new MySQLStorage(plugin);
+                storage.init();
+            } catch (Exception e) {
+                plugin.getLogger().severe("Failed to initialize MySQL storage! Falling back to YAML.");
+                plugin.getLogger().severe("Error: " + e.getMessage());
+                mysqlFailed = true;
+            }
         }
-        
-        storage.init();
+
+        if (mysqlFailed || !type.equalsIgnoreCase("MYSQL")) {
+            storage = new YamlStorage(plugin);
+            storage.init();
+            if (mysqlFailed) {
+                type = "YAML (Fallback)";
+            }
+        }
         
         // Initialize Redis if enabled
         if (plugin.getPluginConfig().isRedisEnable()) {
-            redisManager = new RedisManager(plugin);
-            redisManager.init();
+            try {
+                redisManager = new RedisManager(plugin);
+                redisManager.init();
+            } catch (Exception e) {
+                plugin.getLogger().severe("Failed to initialize Redis! Cross-server synchronization will be disabled.");
+                plugin.getLogger().severe("Error: " + e.getMessage());
+                redisManager = null;
+            }
         }
 
         playerGradients.clear();
