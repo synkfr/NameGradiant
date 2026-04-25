@@ -79,6 +79,7 @@ public class PluginConfig extends OkaeriConfig {
     private boolean redisEnable = false;
     private String redisHost = "localhost";
     private int redisPort = 6379;
+    private String redisUsername = "";
     private String redisPassword = "";
     private String redisChannel = "namegradient_updates";
 
@@ -209,6 +210,10 @@ public class PluginConfig extends OkaeriConfig {
 
     public int getRedisPort() {
         return redisPort;
+    }
+
+    public String getRedisUsername() {
+        return redisUsername;
     }
 
     public String getRedisPassword() {

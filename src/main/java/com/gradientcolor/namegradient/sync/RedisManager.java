@@ -29,10 +29,15 @@ public class RedisManager {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMaxTotal(10);
         
-        if (config.getRedisPassword().isEmpty()) {
+        String user = config.getRedisUsername();
+        String password = config.getRedisPassword();
+
+        if (password.isEmpty()) {
             jedisPool = new JedisPool(poolConfig, config.getRedisHost(), config.getRedisPort());
+        } else if (user.isEmpty()) {
+            jedisPool = new JedisPool(poolConfig, config.getRedisHost(), config.getRedisPort(), 2000, password);
         } else {
-            jedisPool = new JedisPool(poolConfig, config.getRedisHost(), config.getRedisPort(), 2000, config.getRedisPassword());
+            jedisPool = new JedisPool(poolConfig, config.getRedisHost(), config.getRedisPort(), 2000, user, password);
         }
 
         startListening();

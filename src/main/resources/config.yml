@@ -51,5 +51,6 @@ redis:
   enable: false
   host: "localhost"
   port: 6379
+  username: ""
   password: ""
   channel: "namegradient_updates"
