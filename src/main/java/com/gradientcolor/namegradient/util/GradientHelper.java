@@ -85,7 +85,7 @@ public class GradientHelper {
     }
 
     /**
-     * Get the active gradient for a player (returns null if none selected)
+     * Get the active gradient for a player (returns null if none selected and no default)
      */
     public static Gradient getActiveGradient(NameGradient plugin, Player player) {
         // Get the player's selected gradient
@@ -93,6 +93,12 @@ public class GradientHelper {
         if (gradientId != null) {
             return plugin.getGradientsConfig().getGradient(gradientId);
         }
+        
+        int defaultGradientId = plugin.getPluginConfig().getDefaultGradientId();
+        if (defaultGradientId > 0) {
+            return plugin.getGradientsConfig().getGradient(defaultGradientId);
+        }
+        
         return null;
     }
 

@@ -19,6 +19,9 @@ public class PluginConfig extends OkaeriConfig {
     @Comment("If true, NameGradient will not apply a gradient if the name already has colours present")
     private boolean colourDependent = false;
 
+    @Comment("The ID of the default gradient to apply when a player joins or clears their gradient. Set to 0 to use standard Minecraft colour.")
+    private int defaultGradientId = 7;
+
     @Comment("The PlaceholderAPI placeholder to use if mode is set to PLACEHOLDER")
     private String placeholderSource = "%player_name%";
 
@@ -90,6 +93,10 @@ public class PluginConfig extends OkaeriConfig {
 
     public boolean isColourDependent() {
         return colourDependent;
+    }
+
+    public int getDefaultGradientId() {
+        return defaultGradientId;
     }
 
     public String getPlaceholderSource() {

@@ -28,3 +28,7 @@ gradients:
     name: "Water.org Name Colour"
     startColour: "#33E7FF"
     endColour: "#0368FF"
+  7:
+    name: "Default White Colour"
+    startColour: "#FFFFFF"
+    endColour: "#FFFFFF"
