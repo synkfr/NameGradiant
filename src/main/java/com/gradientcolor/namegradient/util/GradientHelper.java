@@ -2,6 +2,7 @@ package com.gradientcolor.namegradient.util;
 
 import com.gradientcolor.namegradient.NameGradient;
 import com.gradientcolor.namegradient.config.okaeri.PluginConfig;
+import com.gradientcolor.namegradient.data.PlayerDataManager;
 import com.gradientcolor.namegradient.model.Gradient;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
@@ -88,18 +89,25 @@ public class GradientHelper {
      * Get the active gradient for a player (returns null if none selected and no default)
      */
     public static Gradient getActiveGradient(NameGradient plugin, Player player) {
-        // Get the player's selected gradient
-        Integer gradientId = plugin.getPlayerDataManager().getPlayerGradient(player.getUniqueId());
+        PlayerDataManager dataManager = plugin.getPlayerDataManager();
+        Integer gradientId = dataManager.getPlayerGradient(player.getUniqueId());
+
         if (gradientId != null) {
-            return plugin.getGradientsConfig().getGradient(gradientId);
+            Gradient gradient;
+            if (dataManager.isActiveGradientCustom(player.getUniqueId())) {
+                gradient = dataManager.getCustomGradient(player.getUniqueId(), gradientId);
+            } else {
+                gradient = plugin.getGradientsConfig().getGradient(gradientId);
+            }
+
+            if (gradient != null) {
+                return gradient;
+            }
         }
-        
-        int defaultGradientId = plugin.getPluginConfig().getDefaultGradientId();
-        if (defaultGradientId > 0) {
-            return plugin.getGradientsConfig().getGradient(defaultGradientId);
-        }
-        
-        return null;
+
+        // Return default gradient if configured
+        int defaultId = plugin.getPluginConfig().getDefaultGradientId();
+        return plugin.getGradientsConfig().getGradient(defaultId);
     }
 
     /**

@@ -47,7 +47,7 @@ public class RedisManager {
         pubSub = new JedisPubSub() {
             @Override
             public void onMessage(String channel, String message) {
-                // Message format: UUID:gradientId (or UUID:clear)
+                // Message format: UUID:gradientId:isCustom (or UUID:clear)
                 try {
                     String[] parts = message.split(":");
                     UUID uuid = UUID.fromString(parts[0]);
@@ -55,10 +55,11 @@ public class RedisManager {
 
                     plugin.getServer().getScheduler().runTask(plugin, () -> {
                         if (action.equals("clear")) {
-                            plugin.getPlayerDataManager().handleRemoteUpdate(uuid, null);
+                            plugin.getPlayerDataManager().handleRemoteUpdate(uuid, null, false);
                         } else {
                             int gradientId = Integer.parseInt(action);
-                            plugin.getPlayerDataManager().handleRemoteUpdate(uuid, gradientId);
+                            boolean isCustom = parts.length > 2 && Boolean.parseBoolean(parts[2]);
+                            plugin.getPlayerDataManager().handleRemoteUpdate(uuid, gradientId, isCustom);
                         }
                     });
                 } catch (Exception e) {
@@ -77,10 +78,10 @@ public class RedisManager {
         }, "NameGradient-Redis").start();
     }
 
-    public void publishUpdate(UUID uuid, Integer gradientId) {
+    public void publishUpdate(UUID uuid, Integer gradientId, boolean isCustom) {
         if (jedisPool == null) return;
 
-        String message = uuid.toString() + ":" + (gradientId == null ? "clear" : gradientId);
+        String message = uuid.toString() + ":" + (gradientId == null ? "clear" : gradientId + ":" + isCustom);
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
             try (Jedis jedis = jedisPool.getResource()) {
                 jedis.publish(channel, message);
