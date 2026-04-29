@@ -40,25 +40,65 @@ public class YamlStorage implements Storage {
     }
 
     @Override
-    public Map<UUID, Integer> loadAllPlayerData() {
-        Map<UUID, Integer> playerGradients = new HashMap<>();
-        if (dataConfig.getConfigurationSection("players") != null) {
-            for (String uuidString : dataConfig.getConfigurationSection("players").getKeys(false)) {
+    public void clearPlayerData(UUID uuid) {
+        dataConfig.set("players." + uuid.toString() + ".active_id", null);
+        dataConfig.set("players." + uuid.toString() + ".is_custom", null);
+        save();
+    }
+
+    @Override
+    public void saveCustomGradient(UUID uuid, com.gradientcolor.namegradient.model.Gradient gradient) {
+        String path = "custom_gradients." + uuid.toString() + "." + gradient.getId();
+        dataConfig.set(path + ".name", gradient.getName());
+        dataConfig.set(path + ".start", gradient.getStartColour());
+        dataConfig.set(path + ".end", gradient.getEndColour());
+        save();
+    }
+
+    @Override
+    public Map<Integer, com.gradientcolor.namegradient.model.Gradient> loadCustomGradients(UUID uuid) {
+        Map<Integer, com.gradientcolor.namegradient.model.Gradient> customGradients = new HashMap<>();
+        String path = "custom_gradients." + uuid.toString();
+        if (dataConfig.getConfigurationSection(path) != null) {
+            for (String idString : dataConfig.getConfigurationSection(path).getKeys(false)) {
                 try {
-                    UUID uuid = UUID.fromString(uuidString);
-                    int gradientId = dataConfig.getInt("players." + uuidString);
-                    playerGradients.put(uuid, gradientId);
-                } catch (IllegalArgumentException e) {
-                    plugin.getLogger().warning("Invalid UUID in playerdata.yml: " + uuidString);
+                    int id = Integer.parseInt(idString);
+                    String name = dataConfig.getString(path + "." + idString + ".name");
+                    String start = dataConfig.getString(path + "." + idString + ".start");
+                    String end = dataConfig.getString(path + "." + idString + ".end");
+                    customGradients.put(id, new com.gradientcolor.namegradient.model.Gradient(id, name, start, end, null, null, 0));
+                } catch (NumberFormatException e) {
+                    plugin.getLogger().warning("Invalid custom gradient ID for " + uuid + ": " + idString);
                 }
             }
         }
-        return playerGradients;
+        return customGradients;
+    }
+
+    @Override
+    public void deleteCustomGradient(UUID uuid, int gradientId) {
+        dataConfig.set("custom_gradients." + uuid.toString() + "." + gradientId, null);
+        save();
+    }
+
+    @Override
+    public void setActiveGradientIsCustom(UUID uuid, boolean isCustom) {
+        dataConfig.set("players." + uuid.toString() + ".is_custom", isCustom);
+        save();
+    }
+
+    @Override
+    public boolean isActiveGradientCustom(UUID uuid) {
+        return dataConfig.getBoolean("players." + uuid.toString() + ".is_custom", false);
     }
 
     @Override
     public Integer loadPlayerData(UUID uuid) {
-        if (dataConfig.contains("players." + uuid.toString())) {
+        if (dataConfig.contains("players." + uuid.toString() + ".active_id")) {
+            return dataConfig.getInt("players." + uuid.toString() + ".active_id");
+        }
+        // Fallback for old data format
+        if (dataConfig.contains("players." + uuid.toString()) && !dataConfig.isConfigurationSection("players." + uuid.toString())) {
             return dataConfig.getInt("players." + uuid.toString());
         }
         return null;
@@ -66,14 +106,27 @@ public class YamlStorage implements Storage {
 
     @Override
     public void savePlayerData(UUID uuid, int gradientId) {
-        dataConfig.set("players." + uuid.toString(), gradientId);
+        dataConfig.set("players." + uuid.toString() + ".active_id", gradientId);
         save();
     }
 
     @Override
-    public void clearPlayerData(UUID uuid) {
-        dataConfig.set("players." + uuid.toString(), null);
-        save();
+    public Map<UUID, Integer> loadAllPlayerData() {
+        Map<UUID, Integer> playerGradients = new HashMap<>();
+        if (dataConfig.getConfigurationSection("players") != null) {
+            for (String uuidString : dataConfig.getConfigurationSection("players").getKeys(false)) {
+                try {
+                    UUID uuid = UUID.fromString(uuidString);
+                    Integer gradientId = loadPlayerData(uuid);
+                    if (gradientId != null) {
+                        playerGradients.put(uuid, gradientId);
+                    }
+                } catch (IllegalArgumentException e) {
+                    plugin.getLogger().warning("Invalid UUID in playerdata.yml: " + uuidString);
+                }
+            }
+        }
+        return playerGradients;
     }
 
     private void save() {
