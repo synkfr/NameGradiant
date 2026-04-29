@@ -67,8 +67,9 @@ public class MenuListener implements Listener {
 
         // Check for gradient selection using PDC
         int gradientId = GradientMenu.extractGradientId(plugin, clickedItem);
+        boolean isCustom = GradientMenu.extractIsCustom(plugin, clickedItem);
         if (gradientId != -1) {
-            handleGradientSelection(player, gradientId);
+            handleGradientSelection(player, gradientId, isCustom);
         }
         // No debug message needed - pane items will just be ignored
     }
@@ -90,8 +91,8 @@ public class MenuListener implements Listener {
         player.closeInventory();
     }
 
-    private void handleGradientSelection(Player player, int gradientId) {
-        Gradient gradient = plugin.getGradientsConfig().getGradient(gradientId);
+    private void handleGradientSelection(Player player, int gradientId, boolean isCustom) {
+        Gradient gradient = isCustom ? plugin.getPlayerDataManager().getCustomGradient(player.getUniqueId(), gradientId) : plugin.getGradientsConfig().getGradient(gradientId);
 
         if (gradient == null) {
             player.sendMessage(plugin.getMessagesConfig().getMessage("gradient_nonexistent"));
@@ -99,17 +100,17 @@ public class MenuListener implements Listener {
         }
 
         // Check if player has permission to use this gradient
-        if (!gradient.hasPermission(player)) {
+        if (!isCustom && !gradient.hasPermission(player)) {
             player.sendMessage(plugin.getMessagesConfig().getMessage("no_permission_gradient"));
             return;
         }
 
         // Apply the gradient - allow changing anytime
-        plugin.getPlayerDataManager().setPlayerGradient(player.getUniqueId(), gradientId);
+        plugin.getPlayerDataManager().setPlayerGradient(player.getUniqueId(), gradientId, isCustom);
         GradientHelper.updatePlayerName(plugin, player);
 
         // Send success message with gradient preview
-        String gradientName = GradientHelper.getGradientPreview(gradient, player.getName());
+        String gradientName = GradientHelper.getGradientPreview(gradient, gradient.getName());
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("{GRADIENT}", gradientName);
         player.sendMessage(plugin.getMessagesConfig().getMessage("apply", placeholders));

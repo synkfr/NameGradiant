@@ -24,6 +24,7 @@ public class GradientMenu implements InventoryHolder {
     // PDC Keys for item identification
     private static NamespacedKey keyGradientId;
     private static NamespacedKey keyAction;
+    private static NamespacedKey keyIsCustom;
 
     // Action values
     public static final String ACTION_CLEAR = "clear";
@@ -44,6 +45,7 @@ public class GradientMenu implements InventoryHolder {
         if (keyGradientId == null) {
             keyGradientId = new NamespacedKey(plugin, "gradient_id");
             keyAction = new NamespacedKey(plugin, "menu_action");
+            keyIsCustom = new NamespacedKey(plugin, "is_custom");
         }
 
         createInventory();
@@ -84,20 +86,26 @@ public class GradientMenu implements InventoryHolder {
 
     private void addGradientItems() {
         PluginConfig config = plugin.getPluginConfig();
-        Collection<Gradient> allGradients = plugin.getGradientsConfig().getAllGradients();
-        List<Gradient> gradientList = new ArrayList<>(allGradients);
-
+        
+        // Combine global gradients and player custom gradients
+        List<Gradient> allGradientsToShow = new ArrayList<>(plugin.getGradientsConfig().getAllGradients());
+        allGradientsToShow.addAll(plugin.getPlayerDataManager().getCustomGradients(player.getUniqueId()).values());
+        
         int perPage = config.getPerPage();
         int startIndex = page * perPage;
-        int endIndex = Math.min(startIndex + perPage, gradientList.size());
+        int endIndex = Math.min(startIndex + perPage, allGradientsToShow.size());
 
         // Get available slots (excluding pane slots and navigation slots)
         List<Integer> availableSlots = getAvailableSlots();
 
         int slotIndex = 0;
         for (int i = startIndex; i < endIndex && slotIndex < availableSlots.size(); i++) {
-            Gradient gradient = gradientList.get(i);
-            ItemStack item = createGradientItem(gradient);
+            Gradient gradient = allGradientsToShow.get(i);
+            
+            // Check if this is a custom gradient
+            boolean isCustom = plugin.getPlayerDataManager().getCustomGradient(player.getUniqueId(), gradient.getId()) != null;
+            
+            ItemStack item = createGradientItem(gradient, isCustom);
             inventory.setItem(availableSlots.get(slotIndex), item);
             slotIndex++;
         }
@@ -119,14 +127,14 @@ public class GradientMenu implements InventoryHolder {
         return available;
     }
 
-    private ItemStack createGradientItem(Gradient gradient) {
+    private ItemStack createGradientItem(Gradient gradient, boolean isCustom) {
         PluginConfig config = plugin.getPluginConfig();
         ItemStack item = new ItemStack(config.getGradientItemMaterial());
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
             // Apply gradient to the item name
-            String gradientName = GradientHelper.getGradientPreview(gradient, gradient.getName());
+            String gradientName = GradientHelper.getGradientPreview(gradient, (isCustom ? "§l[Custom] " : "") + gradient.getName());
             meta.setDisplayName(gradientName);
 
             // Set lore based on permission
@@ -136,7 +144,7 @@ public class GradientMenu implements InventoryHolder {
                     GradientHelper.getGradientPreview(gradient, player.getName()));
             lore.add("");
 
-            if (gradient.hasPermission(player)) {
+            if (isCustom || gradient.hasPermission(player)) {
                 for (String line : config.getGradientLorePermission()) {
                     lore.add(ColorUtil.colorize(line));
                 }
@@ -148,9 +156,10 @@ public class GradientMenu implements InventoryHolder {
 
             meta.setLore(lore);
 
-            // Store gradient ID using PersistentDataContainer (modern approach)
+            // Store gradient ID and custom flag using PDC
             PersistentDataContainer pdc = meta.getPersistentDataContainer();
             pdc.set(keyGradientId, PersistentDataType.INTEGER, gradient.getId());
+            pdc.set(keyIsCustom, PersistentDataType.BYTE, (byte) (isCustom ? 1 : 0));
 
             item.setItemMeta(meta);
         }
@@ -160,9 +169,12 @@ public class GradientMenu implements InventoryHolder {
 
     private void addNavigationItems() {
         PluginConfig config = plugin.getPluginConfig();
-        Collection<Gradient> allGradients = plugin.getGradientsConfig().getAllGradients();
+        
+        List<Gradient> allGradientsToShow = new ArrayList<>(plugin.getGradientsConfig().getAllGradients());
+        allGradientsToShow.addAll(plugin.getPlayerDataManager().getCustomGradients(player.getUniqueId()).values());
+        
         int perPage = config.getPerPage();
-        int totalPages = (int) Math.ceil((double) allGradients.size() / perPage);
+        int totalPages = (int) Math.ceil((double) allGradientsToShow.size() / perPage);
 
         // Page back item
         if (page > 0) {
@@ -248,6 +260,28 @@ public class GradientMenu implements InventoryHolder {
         }
 
         return -1;
+    }
+
+    /**
+     * Extract if gradient is custom from item using PDC
+     */
+    public static boolean extractIsCustom(NameGradient plugin, ItemStack item) {
+        if (item == null || !item.hasItemMeta())
+            return false;
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null)
+            return false;
+
+        NamespacedKey key = new NamespacedKey(plugin, "is_custom");
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+
+        if (pdc.has(key, PersistentDataType.BYTE)) {
+            Byte b = pdc.get(key, PersistentDataType.BYTE);
+            return b != null && b == 1;
+        }
+
+        return false;
     }
 
     /**
