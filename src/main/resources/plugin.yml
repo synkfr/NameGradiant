@@ -13,8 +13,9 @@ softdepend:
 commands:
   gradient:
     description: Opens the gradient selection menu
-    usage: /<command>
+    usage: /<command> [menu|create]
     permission: namegradient.use
+    aliases: [displayname, username, name]
   namegradient:
     description: Main plugin command
     usage: /<command> [reload|clear|change]
@@ -23,6 +24,9 @@ commands:
 permissions:
   namegradient.use:
     description: Permission to open the gradient selector menu
+    default: true
+  namegradient.create:
+    description: Permission to create custom name colors
     default: true
   namegradient.reload:
     description: Permission to reload the configuration

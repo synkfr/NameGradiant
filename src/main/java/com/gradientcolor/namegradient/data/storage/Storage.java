@@ -16,4 +16,14 @@ public interface Storage {
     void savePlayerData(UUID uuid, int gradientId);
 
     void clearPlayerData(UUID uuid);
+
+    void saveCustomGradient(UUID uuid, com.gradientcolor.namegradient.model.Gradient gradient);
+
+    Map<Integer, com.gradientcolor.namegradient.model.Gradient> loadCustomGradients(UUID uuid);
+
+    void deleteCustomGradient(UUID uuid, int gradientId);
+
+    void setActiveGradientIsCustom(UUID uuid, boolean isCustom);
+
+    boolean isActiveGradientCustom(UUID uuid);
 }
