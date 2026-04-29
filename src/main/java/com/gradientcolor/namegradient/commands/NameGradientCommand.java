@@ -157,7 +157,7 @@ public class NameGradientCommand implements CommandExecutor, TabCompleter {
         }
 
         // Set the target's gradient
-        plugin.getPlayerDataManager().setPlayerGradient(target.getUniqueId(), gradientId);
+        plugin.getPlayerDataManager().setPlayerGradient(target.getUniqueId(), gradientId, false);
         GradientHelper.updatePlayerName(plugin, target);
 
         sender.sendMessage(messages().getMessage("change_success"));

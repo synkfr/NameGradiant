@@ -48,7 +48,9 @@ public class NameGradient extends JavaPlugin {
         LuckPermsHook.init(getLogger());
 
         // Register commands
-        getCommand("gradient").setExecutor(new GradientCommand(this));
+        GradientCommand gradientCommand = new GradientCommand(this);
+        getCommand("gradient").setExecutor(gradientCommand);
+        getCommand("gradient").setTabCompleter(gradientCommand);
         getCommand("namegradient").setExecutor(new NameGradientCommand(this));
 
         // Register listeners
